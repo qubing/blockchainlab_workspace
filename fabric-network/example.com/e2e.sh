@@ -1,0 +1,1 @@
+docker exec cli bash ./scripts/script.sh

@@ -1,0 +1,4 @@
+chaincode_example02/go/chaincode_example02
+chaincode_example02/build
+chaincode_example02/node/node_modules
+chaincode_example02/node/package-lock.json

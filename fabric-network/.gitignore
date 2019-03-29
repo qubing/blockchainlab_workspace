@@ -1,0 +1,5 @@
+example.com/crypto-config/ordererOrganizations
+example.com/crypto-config/peerOrganizations
+
+example.com/channel-artifacts/*.tx
+example.com/channel-artifacts/*.block
