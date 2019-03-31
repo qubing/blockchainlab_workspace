@@ -1,5 +1,4 @@
-example.com/crypto-config/ordererOrganizations
-example.com/crypto-config/peerOrganizations
-
+example.com/crypto-config
 example.com/channel-artifacts/*.tx
 example.com/channel-artifacts/*.block
+example.com/config/ca.*.yaml
