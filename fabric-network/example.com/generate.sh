@@ -36,7 +36,7 @@ function replacePrivateKey() {
 #generate certs
 function generateCerts() {
     if [ -d "crypto-config" ]; then
-        rm -Rf crypto-config
+        rm -Rf crypto-config/*
     fi
     cryptogen generate --config=./crypto-config.yaml
 }
