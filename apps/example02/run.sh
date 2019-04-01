@@ -1,18 +1,18 @@
-echo '############## - Prepare(!!!required only at first time!!!) - ######################'
+echo '######## - Prepare(!!!required only at first time!!!) - ########'
 #install required SDK modules
 cd ~/workspace/apps/example02
 npm install --registry=https://registry.npm.taobao.org
+echo '################################################################'
 
 
-
-echo '############## - BEGIN - ######################'
+echo ###################### - BEGIN - ######################'
 #enable tls feature
 export TLS_ENABLED=true
 
 #clear local cert wallet
 rm -r hfc-key-store
 
-echo '######## - ORG1 - ############'
+echo '######## - ORG1 - ########'
 export ORG_NAME=org1.example.com
 export MSP_ID=Org1MSP
 export CA_ADDRESS=localhost:7054
@@ -45,7 +45,7 @@ node query-a_user1.js
 echo '[ORG1]query balance of account `b`'
 node query-b_user1.js
 
-echo '######## - ORG2 - ############'
+echo '######## - ORG2 - ########'
 export ORG_NAME=org2.example.com
 export MSP_ID=Org2MSP
 export CA_ADDRESS=localhost:6054
@@ -78,4 +78,4 @@ node query-a_user1.js
 echo '[ORG2]query balance of account `b`'
 node query-b_user1.js
 
-echo '############## - END - ######################'
+echo '###################### - END - ######################'
