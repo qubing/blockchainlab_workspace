@@ -21,4 +21,6 @@ docker-compose down --volumes --remove-orphans
 clearContainers
 removeUnwantedImages
 sudo rm -r crypto-config/*
+sudo rm -r channel-artifacts/*
 sudo rm channel-artifacts/*
+sudo rm ../../apps/example02/tls/*/ca.crt

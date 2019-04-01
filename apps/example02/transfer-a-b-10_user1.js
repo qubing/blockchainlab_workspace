@@ -26,6 +26,8 @@ if (process.env.PEER_TLS_CERT) {
 }
 
 var ordererAddress = "localhost:7050";
+var ordererName = "orderer.example.com";
+var ordererTLSCertPath = "./tls/orderer/ca.crt";
 
 //
 var fabric_client = new Fabric_Client();
@@ -40,7 +42,7 @@ if (process.env.TLS_ENABLED && process.env.TLS_ENABLED === 'true') {
 		pem: Buffer.from(peerTLSCert).toString(),
 		"ssl-target-name-override": peerName
 	});
-	let ordererTLSCert = fs.readFileSync(path.join(__dirname, './tls/orderer/ca.crt'));
+	let ordererTLSCert = fs.readFileSync(path.join(__dirname, ordererTLSCertPath));
 	orderer = fabric_client.newOrderer('grpcs://' + ordererAddress, {
 		pem: Buffer.from(ordererTLSCert).toString(),
 		"ssl-target-name-override": "orderer.example.com"
@@ -92,7 +94,6 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path}).then((state_store) =>
 		chaincodeId: 'mycc',
 		fcn: 'invoke',
 		args: ['a', 'b', '10'],
-		chainId: 'channel01',
 		txId: tx_id
 	};
 

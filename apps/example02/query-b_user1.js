@@ -20,9 +20,9 @@ if (process.env.PEER_NAME) {
     peerName = process.env.PEER_NAME;
 }
 
-var tlsCert = "./tls/peer0.org1/ca.crt";
-if (process.env.TLS_CERT) {
-    tlsCert = process.env.TLS_CERT;
+var peerTLSCertPath = "./tls/peer0.org1/ca.crt";
+if (process.env.PEER_TLS_CERT) {
+    peerTLSCertPath = process.env.PEER_TLS_CERT;
 }
 
 //
@@ -33,9 +33,9 @@ var channel = fabric_client.newChannel('mychannel');
 var peer
 if (process.env.TLS_ENABLED && process.env.TLS_ENABLED === 'true') {
 	console.log("process.env.TLS_ENABLED is 'true'");
-	let caCert = fs.readFileSync(path.join(__dirname, tlsCert));
+	let peerTLSCert = fs.readFileSync(path.join(__dirname, peerTLSCertPath));
 	peer = fabric_client.newPeer('grpcs://' + peerAddress, {
-		pem: Buffer.from(caCert).toString(),
+		pem: Buffer.from(peerTLSCert).toString(),
 		"ssl-target-name-override": peerName
 	});
 } else {

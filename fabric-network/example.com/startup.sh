@@ -1,4 +1,4 @@
-if [ ! -d "crypto-config" ]; then
+if [ ! -d "crypto-config/peerOrganizations" ]; then
     ./generate.sh
   fi
 

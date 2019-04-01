@@ -1,8 +1,7 @@
-echo '######## - Prepare(!!!required only at first time!!!) - ########'
-#install required SDK modules
-cd ~/workspace/apps/example02
-npm install --registry=https://registry.npm.taobao.org
-echo '################################################################'
+# echo '######## - Prepare(!!!required only at first time!!!) - ########'
+# #install required SDK modules
+# npm install --registry=https://registry.npm.taobao.org
+# echo '################################################################'
 
 
 echo ###################### - BEGIN - ######################'
