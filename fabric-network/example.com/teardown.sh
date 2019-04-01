@@ -20,4 +20,5 @@ function removeUnwantedImages() {
 docker-compose down --volumes --remove-orphans
 clearContainers
 removeUnwantedImages
-#rm -r crypto-config
+sudo rm -r crypto-config/*
+sudo rm -r channel-artifacts/*
