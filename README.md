@@ -4,6 +4,12 @@
 #download docker images
 ./pull-images.sh
 
+#download fabric binaries
+wget https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric/linux-amd64-1.4.0/hyperledger-fabric-linux-amd64-1.4.0.tar.gz -P ~/Downloads/
+
+#extract fabric binaries to `fabric-bin/`
+tar zxf ~/Downloads/hyperledger-fabric-linux-amd64-1.4.0.tar.gz -C ./fabric-bin
+
 #setup fabric-cli into $PATH
 export PATH=$PATH:$PWD/fabric-bin/bin
 
@@ -16,7 +22,6 @@ cd fabric-network/example.com
 
 #run fabric-cli to setup channel, chaincode, and invoke chaincode
 ./e2e.sh
-
 ```
 
 ### Scenario 2: access FABRIC-CA 'ca.org1.example.com' and chaincode on FABRIC-PEER 'peer0.org1.example.com'
