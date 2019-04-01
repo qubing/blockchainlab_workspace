@@ -1,20 +1,76 @@
-### Scenario 1: build network
-
+### Prepare
 ```
-#download docker images
+sudo apt-get install apt-transport-https ca-certificates curl software-properties-common vim libltdl-dev python make node-gyp -y
+```
+
+### Install Golang (v1.11.1)
+```
+# download go SDK
+wget https://dl.google.com/go/go1.11.1.linux-amd64.tar.gz -P ~/Downloads/
+sudo tar zxf ~/Downloads/go1.11.1.linux-amd64.tar.gz -C /usr/local/
+
+# set Golang related environment variables
+export PATH=$PATH:/usr/local/go/bin
+export GOPATH=~/gopath
+
+# create $GOPATH folders
+mkdir ~/gopath
+cd $GOPATH
+mkdir src bin pkg
+```
+
+### Install Docker
+```
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo apt-key fingerprint 0EBFCD88
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+sudo apt-get update
+sudo apt-get install docker-ce -y
+sudo gpasswd -a ${USER} docker
+# relogin linux user required
+```
+
+### Install docker-compose (v1.22.0)
+```
+wget https://github.com/docker/compose/releases/download/1.22.0/docker-compose-`uname -s`-`uname -m` -P ~/Downloads
+sudo cp ~/Downloads/docker-compose-Linux-x86_64 /usr/local/bin/docker-compose
+```
+
+### Install Node.JS SDK (v8.x)
+```
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+source ~/.bashrc
+nvm install 8
+node -v
+npm -v
+```
+
+### Download docker images
+```
+cd ~/workspace
 ./pull-images.sh
+```
 
 #download fabric binaries
+```
 wget https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric/linux-amd64-1.4.0/hyperledger-fabric-linux-amd64-1.4.0.tar.gz -P ~/Downloads/
 
-#extract fabric binaries to `fabric-bin/`
-tar zxf ~/Downloads/hyperledger-fabric-linux-amd64-1.4.0.tar.gz -C ./fabric-bin
+#extract fabric binaries to `fabric-bin`
+tar zxf ~/Downloads/hyperledger-fabric-linux-amd64-1.4.0.tar.gz -C ~/workspace/fabric-bin
+```
 
+---
+
+### Scenario 1: build network
+```
 #setup fabric-cli into $PATH
-export PATH=$PATH:$PWD/fabric-bin/bin
+export PATH=$PATH:~/workspace/fabric-bin/bin
 
 #generate crypto certs and channel-artifacts
-cd fabric-network/example.com
+cd ~/workspace/fabric-network/example.com
 ./generate.sh
 
 #startup fabric-network 'example.com'
@@ -28,7 +84,7 @@ cd fabric-network/example.com
 
 ```
 #install required SDK modules
-cd apps/example02
+cd ~/workspace/apps/example02
 npm install --registry=https://registry.npm.taobao.org
 
 #enable tls feature
@@ -98,5 +154,6 @@ node query-b_user1.js
 
 ```
 #shutdown fabric-network 'example.com' and teardown
+cd ~/workspace/fabric-network/example.com
 ./teardown.sh
 ```
