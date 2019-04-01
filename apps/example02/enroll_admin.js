@@ -12,8 +12,21 @@ var fabric_client = new Fabric_Client();
 var fabric_ca_client = null;
 var admin_user = null;
 var member_user = null;
-var store_path = path.join(__dirname, 'hfc-key-store');
+var orgName = "org1.example.com";
+if (process.env.ORG_NAME) {
+    orgName = process.env.ORG_NAME;
+}
+var store_path = path.join(__dirname, 'hfc-key-store', orgName);
 console.log(' Store path:'+store_path);
+
+var caAddress = "localhost:7054";
+if (process.env.CA_ADDRESS) {
+    caAddress = process.env.CA_ADDRESS;
+}
+var caName = "ca.org1.example.com";
+if (process.env.CA_NAME) {
+    caName = process.env.CA_NAME;
+}
 
 // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
 Fabric_Client.newDefaultKeyValueStore({path: store_path}).then((state_store) => {
@@ -32,10 +45,10 @@ Fabric_Client.newDefaultKeyValueStore({path: store_path}).then((state_store) => 
     // be sure to change the http to https when the CA is running TLS enabled
     if (process.env.TLS_ENABLED && process.env.TLS_ENABLED === 'true') {
         console.log("process.env.TLS_ENABLED is '%s'", process.env.TLS_ENABLED);
-        fabric_ca_client = new Fabric_CA_Client('https://localhost:7054', tlsOptions , 'ca.org1.example.com', crypto_suite);
+        fabric_ca_client = new Fabric_CA_Client('https://' + caAddress, tlsOptions , caName, crypto_suite);
     } else {
         console.log("process.env.TLS_ENABLED is 'false' or not existing.");
-        fabric_ca_client = new Fabric_CA_Client('http://localhost:7054', tlsOptions , 'ca.org1.example.com', crypto_suite);
+        fabric_ca_client = new Fabric_CA_Client('http://' + caAddress, tlsOptions , caName, crypto_suite);
     }
     // first check to see if the admin is already enrolled
     return fabric_client.getUserContext('admin', true);

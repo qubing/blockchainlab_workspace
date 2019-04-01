@@ -111,6 +111,27 @@ services:
     networks:
       - example
 
+  ca.org2.example.com:
+    container_name: ca.org2.example.com
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      # - FABRIC_CA_SERVER_CA_NAME=ca.org1.example.com
+      # - FABRIC_CA_SERVER_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
+      # - FABRIC_CA_SERVER_KEYFILE=/etc/hyperledger/fabric-ca-server-config/606ecfb1376f5d65ad3de71cf98d71a75edbb072f074c39de21f64ac1a093466_sk
+      # - FABRIC_CA_SERVER_TLS_ENABLED=true
+      # - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
+      # - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/606ecfb1376f5d65ad3de71cf98d71a75edbb072f074c39de21f64ac1a093466_sk
+    ports:
+      - "6054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./config/ca.org2.example.com.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+      - ./crypto-config/peerOrganizations/org2.example.com/ca/:/etc/hyperledger/fabric-ca-server/msp
+      - ./crypto-config/peerOrganizations/org2.example.com/ca/:/etc/hyperledger/fabric-ca-server/tls
+    networks:
+      - example
+
   peer0.org2.example.com:
     container_name: peer0.org2.example.com
     image: hyperledger/fabric-peer:$IMAGE_TAG

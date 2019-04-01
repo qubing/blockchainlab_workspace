@@ -6,6 +6,25 @@ var util = require('util');
 var os = require('os');
 var fs = require('fs');
 
+var orgName = "org1.example.com";
+if (process.env.ORG_NAME) {
+    orgName = process.env.ORG_NAME;
+}
+
+var peerAddress = "localhost:7051";
+if (process.env.PEER_ADDRESS) {
+    peerAddress = process.env.PEER_ADDRESS;
+}
+var peerName = "peer0.org1.example.com";
+if (process.env.PEER_NAME) {
+    peerName = process.env.PEER_NAME;
+}
+
+var peerTLSCertPath = "./tls/peer0.org1/ca.crt";
+if (process.env.PEER_TLS_CERT) {
+    peerTLSCertPath = process.env.PEER_TLS_CERT;
+}
+
 //
 var fabric_client = new Fabric_Client();
 
@@ -14,20 +33,20 @@ var channel = fabric_client.newChannel('mychannel');
 var peer
 if (process.env.TLS_ENABLED && process.env.TLS_ENABLED === 'true') {
 	console.log("process.env.TLS_ENABLED is 'true'");
-	let caCert = fs.readFileSync(path.join(__dirname, './tls/peer0.org1/ca.crt'));
-	peer = fabric_client.newPeer('grpcs://127.0.0.1:7051', {
-		pem: Buffer.from(caCert).toString(),
-		"ssl-target-name-override": "peer0.org1.example.com"
+	let peerTLSCert = fs.readFileSync(path.join(__dirname, peerTLSCertPath));
+	peer = fabric_client.newPeer('grpcs://' + peerAddress, {
+		pem: Buffer.from(peerTLSCert).toString(),
+		"ssl-target-name-override": peerName
 	});
 } else {
 	console.log("process.env.TLS_ENABLED is 'false' or not existing.");
-	peer = fabric_client.newPeer('grpc://localhost:7051');
+	peer = fabric_client.newPeer('grpc://' + peerAddress);
 }
 channel.addPeer(peer);
 
 //
 var member_user = null;
-var store_path = path.join(__dirname, 'hfc-key-store');
+var store_path = path.join(__dirname, 'hfc-key-store', orgName);
 console.log('Store path:'+store_path);
 var tx_id = null;
 
@@ -76,5 +95,5 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path}).then((state_store) =>
 		console.log("No payloads were returned from query");
 	}
 }).catch((err) => {
-	console.error('Failed to query successfully :: ' + err);
+	console.error('Failed to query :: ' + err);
 });

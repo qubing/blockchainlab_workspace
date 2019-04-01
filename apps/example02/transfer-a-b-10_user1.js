@@ -6,6 +6,27 @@ var util = require('util');
 var os = require('os');
 var fs = require('fs');
 
+var orgName = "org1.example.com";
+if (process.env.ORG_NAME) {
+    orgName = process.env.ORG_NAME;
+}
+
+var peerAddress = "localhost:7051";
+if (process.env.PEER_ADDRESS) {
+    peerAddress = process.env.PEER_ADDRESS;
+}
+var peerName = "peer0.org1.example.com";
+if (process.env.PEER_NAME) {
+    peerName = process.env.PEER_NAME;
+}
+
+var peerTLSCertPath = "./tls/peer0.org1/ca.crt";
+if (process.env.PEER_TLS_CERT) {
+    peerTLSCertPath = process.env.PEER_TLS_CERT;
+}
+
+var ordererAddress = "localhost:7050";
+
 //
 var fabric_client = new Fabric_Client();
 
@@ -14,27 +35,27 @@ var channel = fabric_client.newChannel('mychannel');
 var peer, orderer
 if (process.env.TLS_ENABLED && process.env.TLS_ENABLED === 'true') {
 	console.log("process.env.TLS_ENABLED is 'true'");
-	let peerTLSCert = fs.readFileSync(path.join(__dirname, './tls/peer0.org1/ca.crt'));
-	let ordererTLSCert = fs.readFileSync(path.join(__dirname, './tls/orderer/ca.crt'));
-	peer = fabric_client.newPeer('grpcs://127.0.0.1:7051', {
+	let peerTLSCert = fs.readFileSync(path.join(__dirname, peerTLSCertPath));
+	peer = fabric_client.newPeer('grpcs://' + peerAddress, {
 		pem: Buffer.from(peerTLSCert).toString(),
-		"ssl-target-name-override": "peer0.org1.example.com"
+		"ssl-target-name-override": peerName
 	});
-	orderer = fabric_client.newOrderer('grpcs://localhost:7050', {
+	let ordererTLSCert = fs.readFileSync(path.join(__dirname, './tls/orderer/ca.crt'));
+	orderer = fabric_client.newOrderer('grpcs://' + ordererAddress, {
 		pem: Buffer.from(ordererTLSCert).toString(),
 		"ssl-target-name-override": "orderer.example.com"
 	})
 } else {
 	console.log("process.env.TLS_ENABLED is 'false' or not existing.");
-	peer = fabric_client.newPeer('grpc://localhost:7051');
-	orderer = fabric_client.newOrderer('grpc://localhost:7050')
+	peer = fabric_client.newPeer('grpc://' + peerAddress);
+	orderer = fabric_client.newOrderer('grpc://' + ordererAddress);
 }
 channel.addPeer(peer);
 channel.addOrderer(orderer);
 
 //
 var member_user = null;
-var store_path = path.join(__dirname, 'hfc-key-store');
+var store_path = path.join(__dirname, 'hfc-key-store', orgName);
 console.log('Store path:'+store_path);
 var tx_id = null;
 
