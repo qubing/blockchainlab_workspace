@@ -3,78 +3,74 @@
 # npm install --registry=https://registry.npm.taobao.org
 # echo '################################################################'
 
-
-echo ###################### - BEGIN - ######################'
-#enable tls feature
+echo '##################### - BEGIN - #####################'
+#enable tls feature by default
+if [ -z $TLS_ENABLED ]; then
 export TLS_ENABLED=true
+fi
+echo "TLS_ENABLED="$TLS_ENABLED
 
 #clear local cert wallet
-rm -r hfc-key-store
+rm -r wallet
 
 echo '######## - ORG1 - ########'
 export ORG_NAME=org1.example.com
 export MSP_ID=Org1MSP
-export CA_ADDRESS=localhost:7054
-export CA_NAME=ca.org1.example.com
-export PEER_ADDRESS=localhost:7051
-export PEER_NAME=peer0.org1.example.com
-export PEER_TLS_CERT="./tls/peer0.org1/ca.crt"
+export CONNECTION_PROFILE=connection-org1.json
 
 #enroll 'admin' with password 
-echo '[ORG1]enroll `admin` and store certs in `hfc-key-store/org1.example.com`'
-node enroll_admin.js
+echo '[ORG1]enroll `admin` and store certs in `wallet/org1.example.com`'
+node enroll_user.js admin adminpw
 
+export USER_NAME=admin
 #register user 'user1'
-echo '[ORG1]register `user1` and store certs in `hfc-key-store/org1.example.com`'
-node register-user1_admin.js
+echo '[ORG1]register `user1` and store certs in `wallet/org1.example.com`'
+node register_user.js user1 user1pw
+
+node enroll_user.js user1 user1pw
+
+export USER_NAME=user1
 
 #query balance of account 'a'
 echo '[ORG1]query balance of account `a`'
-node query-a_user1.js
+node query.js a
 
 #transfer 10$ from account 'a' to 'b'
 echo '[ORG1]transfer 10$ from account `a` to account `b`'
-node transfer-a-b-10_user1.js
+node transfer.js a b 10
 
 #query balance of account 'a'
 echo '[ORG1]query balance of account `a`'
-node query-a_user1.js
-
-#query balance of account 'b'
-echo '[ORG1]query balance of account `b`'
-node query-b_user1.js
+node query.js a
 
 echo '######## - ORG2 - ########'
 export ORG_NAME=org2.example.com
 export MSP_ID=Org2MSP
-export CA_ADDRESS=localhost:6054
-export CA_NAME=ca.org2.example.com
-export PEER_ADDRESS=localhost:6051
-export PEER_NAME=peer0.org2.example.com
-export PEER_TLS_CERT="./tls/peer0.org2/ca.crt"
+export CONNECTION_PROFILE=connection-org2.json
 
 #enroll 'admin' with password 
-echo '[ORG2]enroll `admin` and store certs in `hfc-key-store/org2.example.com`'
-node enroll_admin.js
+echo '[ORG2]enroll `admin` and store certs in `wallet/org2.example.com`'
+node enroll_user.js admin adminpw
 
-#register user 'user1'
-echo '[ORG2]register `user1` and store certs in `hfc-key-store/org2.example.com`'
-node register-user1_admin.js
+export USER_NAME=admin
+#register user 'user2'
+echo '[ORG2]register `user2` and store certs in `wallet/org2.example.com`'
+node register_user.js user2 user2pw
 
-#query balance of account 'a'
-echo '[ORG2]query balance of account `a`'
-node query-a_user1.js
+node enroll_user.js user2 user2pw
 
-#transfer 10$ from account 'a' to 'b'
-echo '[ORG2]transfer 10$ from account `a` to account `b`'
-node transfer-a-b-10_user1.js
-
-#query balance of account 'a'
-echo '[ORG2]query balance of account `a`'
-node query-a_user1.js
+export USER_NAME=user2
 
 #query balance of account 'b'
 echo '[ORG2]query balance of account `b`'
-node query-b_user1.js
+node query.js b
+
+#transfer 12$ from account 'b' to 'a'
+echo '[ORG2]transfer 12$ from account `b` to account `a`'
+node transfer.js b a 12
+
+#query balance of account 'a'
+echo '[ORG2]query balance of account `b'
+node query.js b
 
 echo '###################### - END - ######################'

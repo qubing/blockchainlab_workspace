@@ -20,7 +20,11 @@ function removeUnwantedImages() {
 docker-compose down --volumes --remove-orphans
 clearContainers
 removeUnwantedImages
-sudo rm -r crypto-config/*
-sudo rm -r channel-artifacts/*
-sudo rm channel-artifacts/*
-sudo rm ../../apps/example02/tls/*/ca.crt
+rm -r crypto-config/*
+rm -r channel-artifacts/*
+rm channel-artifacts/*
+
+apps=(example02 example03)
+  for app in ${apps[@]}; do
+  rm ../../apps/${app}/tls/*/ca.crt
+done

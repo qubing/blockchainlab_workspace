@@ -72,8 +72,8 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 		if err != nil {
 			return shim.Error(err.Error())
 		}
-	} else if funcName == "upgrade" {
-		fmt.Println("ex02 Upgrade")
+	} else if funcName == "upgrade_1.1" {
+		fmt.Println("ex02 Upgraded to v1.1")
 	} else {
 		return shim.Error("function name is not correct.")
 	}
@@ -84,25 +84,22 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Println("ex02 Invoke")
 	function, args := stub.GetFunctionAndParameters()
-	if function == "invoke" {
+	if function == "transfer" {
 		// Make payment of X units from A to B
-		return t.invoke(stub, args)
+		return t.transfer(stub, args)
 	} else if function == "delete" {
 		// Deletes an entity from its state
 		return t.delete(stub, args)
 	} else if function == "query" {
 		// the old "Query" is now implemtned in invoke
 		return t.query(stub, args)
-	} else if function == "charge" {
-		// Charge account
-		return t.charge(stub, args)
 	}
 
-	return shim.Error("Invalid invoke function name. Expecting \"invoke\" \"delete\" \"query\"")
+	return shim.Error(`Invalid invoke function name. Expecting "transfer" "delete" "query"`)
 }
 
 // Transaction makes payment of X units from A to B
-func (t *SimpleChaincode) invoke(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (t *SimpleChaincode) transfer(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var A, B string    // Entities
 	var Aval, Bval int // Asset holdings
 	var X int          // Transaction value
@@ -141,6 +138,11 @@ func (t *SimpleChaincode) invoke(stub shim.ChaincodeStubInterface, args []string
 		return shim.Error("Invalid transaction amount, expecting a integer value")
 	}
 	Aval = Aval - X
+
+	if Aval <= 0 {
+		return shim.Error("Invalid transaction amount, balance is not enough for transfer")
+	}
+
 	Bval = Bval + X
 	fmt.Printf("Aval = %d, Bval = %d\n", Aval, Bval)
 
@@ -201,42 +203,6 @@ func (t *SimpleChaincode) query(stub shim.ChaincodeStubInterface, args []string)
 	jsonResp := "{\"Name\":\"" + A + "\",\"Amount\":\"" + string(Avalbytes) + "\"}"
 	fmt.Printf("Query Response:%s\n", jsonResp)
 	return shim.Success(Avalbytes)
-}
-
-func (t *SimpleChaincode) charge(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var accountName string        // Entities
-	var chargeAmount, balance int // Asset holdings
-	var err error
-
-	if len(args) != 2 {
-		return shim.Error("Incorrect number of arguments. (Expecting 2)")
-	}
-
-	accountName = args[0]
-
-	balanceBytes, err := stub.GetState(accountName)
-	if err != nil {
-		return shim.Error("Failed to get state. err: " + err.Error())
-	}
-	if balanceBytes == nil {
-		return shim.Error("Account not found")
-	}
-	balance, err = strconv.Atoi(string(balanceBytes))
-	if err != nil {
-		balance = 0
-	}
-	chargeAmount, err = strconv.Atoi(args[1])
-	if err != nil || chargeAmount <= 0 {
-		return shim.Error("chargeAmount is not valid")
-	}
-	balance += chargeAmount
-
-	err = stub.PutState(accountName, []byte(strconv.Itoa(balance)))
-	if err != nil {
-		return shim.Error(err.Error())
-	}
-
-	return shim.Success(nil)
 }
 
 func main() {

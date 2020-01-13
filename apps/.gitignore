@@ -1,0 +1,8 @@
+.idea
+wallet
+node_modules
+package-lock.json
+**/*.crt
+**/*.pem
+**/*.key
+example02_bak

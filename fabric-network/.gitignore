@@ -3,3 +3,4 @@ example.com/crypto-config/peerOrganizations
 example.com/channel-artifacts/*.tx
 example.com/channel-artifacts/*.block
 example.com/config/ca.*.yaml
+example.com/docker-compose.yaml
