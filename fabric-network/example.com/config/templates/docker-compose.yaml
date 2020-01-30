@@ -44,7 +44,7 @@ services:
 
   ca.org1.example.com:
     container_name: ca.org1.example.com
-    image: hyperledger/fabric-ca:$IMAGE_TAG
+    image: hyperledger/fabric-ca:$CA_TAG
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       # - FABRIC_CA_SERVER_CA_NAME=ca.org1.example.com
@@ -113,7 +113,7 @@ services:
 
   ca.org2.example.com:
     container_name: ca.org2.example.com
-    image: hyperledger/fabric-ca:$IMAGE_TAG
+    image: hyperledger/fabric-ca:$CA_TAG
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       # - FABRIC_CA_SERVER_CA_NAME=ca.org1.example.com

@@ -47,7 +47,7 @@ function generateCerts() {
 }
 
 function copyTLScerts() {
-  apps=(example02 example03)
+  apps=(example02)
   for app in ${apps[@]}; do
     #certs of org1
     cp crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem ../../apps/${app}/tls/ca.org1/
