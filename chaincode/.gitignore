@@ -1,4 +1,6 @@
-chaincode_example02*/go/chaincode_example02
-chaincode_example02*/build
+chaincode_example02*/go/build/vendor
+chaincode_example02*/go/build/go.*
+chaincode_example02*/go/build/example02
+chaincode_example02*/java/build
 chaincode_example02*/node/node_modules
 chaincode_example02*/node/package-lock.json

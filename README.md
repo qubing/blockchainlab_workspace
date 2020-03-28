@@ -3,11 +3,11 @@
 sudo apt-get install apt-transport-https ca-certificates curl software-properties-common vim libltdl-dev python make node-gyp -y
 ```
 
-### Install Golang (v1.11.1)
+### Install Golang (v1.13.6)
 ```
 # download go SDK
-wget https://dl.google.com/go/go1.11.1.linux-amd64.tar.gz -P ~/Downloads/
-sudo tar zxf ~/Downloads/go1.11.1.linux-amd64.tar.gz -C /usr/local/
+wget https://dl.google.com/go/go1.13.6.linux-amd64.tar.gz -P ~/Downloads/
+sudo tar zxf ~/Downloads/go1.13.6.linux-amd64.tar.gz -C /usr/local/
 
 # set Golang related environment variables
 export PATH=$PATH:/usr/local/go/bin
@@ -204,3 +204,16 @@ echo 'OK.'
 cd ~/workspace/fabric-network/example.com
 ./teardown.sh
 ```
+
+
+## prepare chaincode compiler environment for v2.0
+```
+go get -u github.com/hyperledger/fabric-chaincode-go
+go get -u github.com/hyperledger/fabric-protos-go
+git clone https://github.com/grpc/grpc-go $GOPATH/src/google.golang.org/grpc
+git clone https://github.com/golang/net.git $GOPATH/src/golang.org/x/net
+git clone https://github.com/golang/text.git $GOPATH/src/golang.org/x/text
+git clone https://github.com/googleapis/go-genproto $GOPATH/src/google.golang.org/genproto
+go get -u github.com/google/go-cmp/cmp
+```
+

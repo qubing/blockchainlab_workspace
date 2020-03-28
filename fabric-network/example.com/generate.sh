@@ -30,11 +30,15 @@ function replacePrivateKey() {
   cp ./config/templates/docker-compose.yaml ./
   sed $OPTS "s/|TLS_ENABLED|/${TLS_ENABLED}/g" ./docker-compose.yaml
 
+  cp ./config/templates/go-dev.yaml ./
+  sed $OPTS "s/|TLS_ENABLED|/${TLS_ENABLED}/g" ./go-dev.yaml
+
   # If MacOSX, remove the temporary backup of the docker-compose file
   if [ "$ARCH" == "Darwin" ]; then
     rm ./config/ca.org1.example.com.yamlt
     rm ./config/ca.org2.example.com.yamlt
     rm ./docker-compose.yamlt
+    rm ./go-dev.yamlt
   fi
 }
 

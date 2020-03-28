@@ -2,7 +2,7 @@
 
 DOCKER_NS=hyperledger
 CA_VERSION=1.4.4
-FABRIC_VERSION=1.4.4
+FABRIC_VERSION=2.0.0
 OTHER_VERSION=0.4.18
 
 # fabric-ca image
