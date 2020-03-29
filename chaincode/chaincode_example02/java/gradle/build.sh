@@ -1,3 +1,3 @@
 #brew install gradle
 #gradle wrapper
-gradle clean build test install
+gradle clean compileJava test shadowJar

@@ -23,7 +23,7 @@ public final class SimpleChaincode implements ContractInterface {
     enum Message {
         AccountNotExsiting("Account '%s' does not exist."),
         NoEnoughBalance("There is no enough balance to transfer in account '%s'."),
-        BalanceNotValid("Account balance is not valid. ('%s': %d)");
+        BalanceNotValid("Account balance is not valid. ('%s': %s)");
     
         private String tmpl;
     

@@ -8,7 +8,11 @@ function setupCommonENV() {
     export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
     export CHANNEL_NAME=mychannel
     export CHAINCODE_NAME=mycc
-    export CHAINCODE_PATH=github.com/chaincode/chaincode_example02/go/build
+    #export LANG=golang
+    #export CHAINCODE_PATH=github.com/chaincode/chaincode_example02/go/build
+    export LANG=java
+    export CHAINCODE_PATH=$GOPATH/src/github.com/chaincode/chaincode_example02/java/gradle/build/libs
+    #export CHAINCODE_PATH=github.com/chaincode/chaincode_example02/node
     export CHAINCODE_VERSION=v1.0
 }
 
@@ -55,12 +59,12 @@ peer channel update -o ${ORDERER_ADDRESS} -c mychannel -f ./channel-artifacts/Or
 
 echo '######## - (ORG1) install chaincode - ########'
 setupPeerENV1
-peer lifecycle chaincode package ${CHAINCODE_NAME}_${CHAINCODE_VERSION}.tar.gz --path ${CHAINCODE_PATH} --lang golang --label ${CHAINCODE_NAME}_${CHAINCODE_VERSION}
+peer lifecycle chaincode package ${CHAINCODE_NAME}_${CHAINCODE_VERSION}.tar.gz --path ${CHAINCODE_PATH} --lang $LANG --label ${CHAINCODE_NAME}_${CHAINCODE_VERSION}
 peer lifecycle chaincode install ${CHAINCODE_NAME}_${CHAINCODE_VERSION}.tar.gz
 
 echo '######## - (ORG2) install chaincode - ########'
 setupPeerENV2
-peer lifecycle chaincode package ${CHAINCODE_NAME}_${CHAINCODE_VERSION}.tar.gz --path ${CHAINCODE_PATH} --lang golang --label ${CHAINCODE_NAME}_${CHAINCODE_VERSION}
+peer lifecycle chaincode package ${CHAINCODE_NAME}_${CHAINCODE_VERSION}.tar.gz --path ${CHAINCODE_PATH} --lang $LANG --label ${CHAINCODE_NAME}_${CHAINCODE_VERSION}
 peer lifecycle chaincode install ${CHAINCODE_NAME}_${CHAINCODE_VERSION}.tar.gz
 
 echo '######## - (ORG1) approve chaincode - ########'

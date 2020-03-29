@@ -43,7 +43,9 @@ public class SimpleChaincodeTest {
                 contract.init(ctx, "A", "100A", "B", "200");
             });
             
-            assertThat(thrown).isNotNull();
+            assertThat(thrown)
+                .isInstanceOf(ChaincodeException.class)
+                .hasMessage(String.format(SimpleChaincode.Message.BalanceNotValid.toString(), "A", "100A"));
         }
     }
 
