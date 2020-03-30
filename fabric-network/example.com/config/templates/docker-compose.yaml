@@ -14,29 +14,37 @@ services:
     container_name: orderer.example.com
     image: hyperledger/fabric-orderer:$IMAGE_TAG
     environment:
-      - FABRIC_CFG_PATH=/var/hyperledger/orderer
-      - FABRIC_LOGGING_SPEC=INFO
+      # home path
+      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
 
-      # - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
-      # - ORDERER_GENERAL_GENESISMETHOD=file
-      # - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
-      # - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
-      # - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
-      # enabled TLS
+      # =================================================================================================================
+      # ============= ENV variables for configuration (can be instead by '%FABRIC_CFG_PATH%/orderer.yaml') ==============
+      # general settings
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=7050
+      # TLS settings
       - ORDERER_GENERAL_TLS_ENABLED=|TLS_ENABLED|
-      # - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-      # - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-      # - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-      # - ORDERER_KAFKA_TOPIC_REPLICATIONFACTOR=1
-      # - ORDERER_KAFKA_VERBOSE=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[tls/ca.crt]
+      #genesis settings
+      - ORDERER_GENERAL_BOOTSTRAPMETHOD=file
+      - ORDERER_GENERAL_BOOTSTRAPFILE=orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPDIR=msp
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      # =================================================================================================================
+
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: orderer
     volumes:
-      - ./config/orderer.example.com.yaml:/var/hyperledger/orderer/orderer.yaml
-      - ./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
-      - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
-      - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/var/hyperledger/orderer/tls
-      # - orderer.example.com:/var/hyperledger/production/orderer
+      # =================================================================================================================
+      # ============= YAML files for configuration to override default in '%FABRIC_CFG_PATH%/orderer.yaml' ==============
+      # - ./config/orderer.example.com.yaml:/etc/hyperledger/fabric/orderer.yaml
+      # =================================================================================================================
+
+      - ./channel-artifacts/genesis.block:/etc/hyperledger/fabric/orderer.genesis.block
+      - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/etc/hyperledger/fabric/tls
     ports:
       - 7050:7050
     networks:
@@ -47,17 +55,27 @@ services:
     image: hyperledger/fabric-ca:$CA_TAG
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      # - FABRIC_CA_SERVER_CA_NAME=ca.org1.example.com
-      # - FABRIC_CA_SERVER_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
-      # - FABRIC_CA_SERVER_KEYFILE=/etc/hyperledger/fabric-ca-server-config/606ecfb1376f5d65ad3de71cf98d71a75edbb072f074c39de21f64ac1a093466_sk
+
+      # ===================================================================================================================================
+      # =============== ENV Variables for configuration (can be instead by '%FABRIC_CA_HOME%/fabric-ca-server-config.yaml') ===============
+      # CA settings
+      - FABRIC_CA_SERVER_CA_NAME=ca.org1.example.com
+      - FABRIC_CA_SERVER_CERTFILE=msp/ca.org1.example.com-cert.pem
+      - FABRIC_CA_SERVER_KEYFILE=msp/|CA1_PRIVATE_KEY|
       - FABRIC_CA_SERVER_TLS_ENABLED=|TLS_ENABLED|
-      # - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
-      # - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/606ecfb1376f5d65ad3de71cf98d71a75edbb072f074c39de21f64ac1a093466_sk
+      - FABRIC_CA_SERVER_TLS_CERTFILE=tls/ca.org1.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=tls/|CA1_PRIVATE_KEY|
+      # ===================================================================================================================================
+
     ports:
       - "7054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - ./config/ca.org1.example.com.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+      # ================================================================================================================================
+      # =============== YAML file for configuration to override default in '%FABRIC_CFG_PATH%/core.yaml' ===============================
+      # - ./config/ca.org1.example.com.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+      # ================================================================================================================================
+
       - ./crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server/msp
       - ./crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server/tls
     networks:
@@ -67,31 +85,55 @@ services:
     container_name: peer0.org1.example.com
     image: hyperledger/fabric-peer:$IMAGE_TAG
     environment:
-      - FABRIC_CFG_PATH=/var/hyperledger/fabric
-      - FABRIC_LOGGING_SPEC=INFO
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=net_example
-      # - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      # the following setting starts chaincode containers on the same
-      # bridge network as the peers
-      # https://docs.docker.com/compose/networking/
+      # home path
+      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+
+      # =================================================================================================================
+      # =============== ENV Variables for configuration (can be instead by '%FABRIC_CFG_PATH%/core.yaml') ===============
+      # peer settings
+      - CORE_PEER_ID=peer0.org1.example.com
+      - CORE_PEER_NETWORKID=example-network
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=127.0.0.1:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
+      - CORE_PEER_MSPCONFIGPATH=msp
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      # tls settings
       - CORE_PEER_TLS_ENABLED=|TLS_ENABLED|
-      # - CORE_PEER_GOSSIP_USELEADERELECTION=true
-      # - CORE_PEER_GOSSIP_ORGLEADER=false
-      # - CORE_PEER_PROFILE_ENABLED=false
-      # - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/fabric/tls/server.crt
-      # - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/fabric/tls/server.key
-      # - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/fabric/tls/ca.crt
-      # - CORE_PEER_ID=peer0.org1.example.com
-      # - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
-      # - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org1.example.com:7051
-      # - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
-      # - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_TLS_CERT_FILE=tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=tls/ca.crt
+      # vm settings
+      - CORE_VM_ENDPOINT=unix:///var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=net_$NETWORK_NAME
+      # chaincode settings
+      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:$IMAGE_TAG
+      - CORE_CHAINCODE_PULL=false
+      - CORE_CHAINCODE_GOLANG_RUNTIME=hyperledger/fabric-baseos:$BASE_TAG
+      - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:$IMAGE_TAG
+      - CORE_CHAINCODE_NODE_RUNTIME=hyperledger/fabric-nodeenv:$IMAGE_TAG
+      - CORE_CHAINCODE_MODE=net
+      - CORE_CHAINCODE_LOGGIN_LEVEL=info
+      - CORE_CHAINCODE_LOGGIN_SHIM=warning
+      # couchdb_settings
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB #(goleveldb | CouchDB, default=goleveldb)
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=db.peer0.org1.example.com:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+      # history_db_enabled
+      - CORE_HISTORY_ENABLEHISTORYDATABASE=true
+      # =================================================================================================================
+
     volumes:
-        - /var/run/:/host/var/run/
-        - ./config/peer0.org1.example.com.yaml:/var/hyperledger/fabric/core.yaml
-        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/var/hyperledger/fabric/msp
-        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/var/hyperledger/fabric/tls
-        # - peer0.org1.example.com:/var/hyperledger/production
+      # =================================================================================================================
+      # =============== YAML file for configuration to override default in '%FABRIC_CFG_PATH%/core.yaml' ================
+      # - ./config/peer0.org1.example.com.yaml:/etc/hyperledger/fabric/core.yaml
+      # =================================================================================================================
+      - /var/run/:/var/run/
+      - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/etc/hyperledger/fabric/tls
+      # - peer0.org1.example.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
     ports:
@@ -116,17 +158,28 @@ services:
     image: hyperledger/fabric-ca:$CA_TAG
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      # - FABRIC_CA_SERVER_CA_NAME=ca.org1.example.com
-      # - FABRIC_CA_SERVER_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
-      # - FABRIC_CA_SERVER_KEYFILE=/etc/hyperledger/fabric-ca-server-config/606ecfb1376f5d65ad3de71cf98d71a75edbb072f074c39de21f64ac1a093466_sk
+
+      # ===================================================================================================================================
+      # =============== ENV Variables for configuration (can be instead by '%FABRIC_CA_HOME%/fabric-ca-server-config.yaml') ===============
+      # CA settings
+      - FABRIC_CA_SERVER_CA_NAME=ca.org2.example.com
+      - FABRIC_CA_SERVER_CERTFILE=msp/ca.org2.example.com-cert.pem
+      - FABRIC_CA_SERVER_KEYFILE=msp/|CA2_PRIVATE_KEY|
+      # TLS settings
       - FABRIC_CA_SERVER_TLS_ENABLED=|TLS_ENABLED|
-      # - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
-      # - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/606ecfb1376f5d65ad3de71cf98d71a75edbb072f074c39de21f64ac1a093466_sk
+      - FABRIC_CA_SERVER_TLS_CERTFILE=tls/ca.org2.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=tls/|CA2_PRIVATE_KEY|
+      # ===================================================================================================================================
+
     ports:
       - "6054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - ./config/ca.org2.example.com.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+      # ================================================================================================================================
+      # =============== YAML file for configuration to override default in '%FABRIC_CFG_PATH%/core.yaml' ===============================
+      # - ./config/ca.org2.example.com.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+      # ================================================================================================================================
+      
       - ./crypto-config/peerOrganizations/org2.example.com/ca/:/etc/hyperledger/fabric-ca-server/msp
       - ./crypto-config/peerOrganizations/org2.example.com/ca/:/etc/hyperledger/fabric-ca-server/tls
     networks:
@@ -136,31 +189,56 @@ services:
     container_name: peer0.org2.example.com
     image: hyperledger/fabric-peer:$IMAGE_TAG
     environment:
-      - FABRIC_CFG_PATH=/var/hyperledger/fabric
-      - FABRIC_LOGGING_SPEC=INFO
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=net_example
-      # - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      # the following setting starts chaincode containers on the same
-      # bridge network as the peers
-      # https://docs.docker.com/compose/networking/
+      # home path
+      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+
+      # =================================================================================================================
+      # =============== ENV Variables for configuration (can be instead by '%FABRIC_CFG_PATH%/core.yaml') ===============
+      # peer settings
+      - CORE_PEER_ID=peer0.org2.example.com
+      - CORE_PEER_NETWORKID=example-network
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_ADDRESS=peer0.org2.example.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=127.0.0.1:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:7051
+      - CORE_PEER_MSPCONFIGPATH=msp
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      # tls settings
       - CORE_PEER_TLS_ENABLED=|TLS_ENABLED|
-      # - CORE_PEER_GOSSIP_USELEADERELECTION=true
-      # - CORE_PEER_GOSSIP_ORGLEADER=false
-      # - CORE_PEER_PROFILE_ENABLED=false
-      # - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/fabric/tls/server.crt
-      # - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/fabric/tls/server.key
-      # - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/fabric/tls/ca.crt
-      # - CORE_PEER_ID=peer0.org1.example.com
-      # - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
-      # - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org1.example.com:7051
-      # - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
-      # - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_TLS_CERT_FILE=tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=tls/ca.crt
+      # vm settings
+      - CORE_VM_ENDPOINT=unix:///var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=net_$NETWORK_NAME
+      # chaincode settings
+      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:$IMAGE_TAG
+      - CORE_CHAINCODE_PULL=false
+      - CORE_CHAINCODE_GOLANG_RUNTIME=hyperledger/fabric-baseos:$BASE_TAG
+      - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:$IMAGE_TAG
+      - CORE_CHAINCODE_NODE_RUNTIME=hyperledger/fabric-nodeenv:$IMAGE_TAG
+      - CORE_CHAINCODE_MODE=net
+      - CORE_CHAINCODE_LOGGIN_LEVEL=info
+      - CORE_CHAINCODE_LOGGIN_SHIM=warning
+      # couchdb_settings
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB #(goleveldb | CouchDB, default=goleveldb)
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=db.peer0.org1.example.com:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+      # history_db_enabled
+      - CORE_HISTORY_ENABLEHISTORYDATABASE=true
+      # =================================================================================================================
+
     volumes:
-        - /var/run/:/host/var/run/
-        - ./config/peer0.org2.example.com.yaml:/var/hyperledger/fabric/core.yaml
-        - ./crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/var/hyperledger/fabric/msp
-        - ./crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/var/hyperledger/fabric/tls
-        # - peer0.org1.example.com:/var/hyperledger/production
+      # =================================================================================================================
+      # =============== YAML file for configuration to override default in '%FABRIC_CFG_PATH%/core.yaml' ================
+      # - ./config/peer0.org2.example.com.yaml:/etc/hyperledger/fabric/core.yaml
+      # =================================================================================================================
+
+      - /var/run/:/var/run/
+      - ./crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls
+      # - peer0.org1.example.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
     ports:
@@ -187,7 +265,7 @@ services:
     stdin_open: true
     environment:
       - GOPATH=/opt/gopath
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_ENDPOINT=unix:///var/run/docker.sock
       #- FABRIC_LOGGING_SPEC=DEBUG
       - FABRIC_LOGGING_SPEC=INFO
       - CORE_PEER_ID=cli
@@ -201,11 +279,11 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: /bin/bash
     volumes:
-        - /var/run/:/host/var/run/
-        - ./../../chaincode/:/opt/gopath/src/github.com/chaincode
-        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
-        - ./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
-        - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+      - /var/run/:/var/run/
+      - ./../../chaincode/:/opt/gopath/src/github.com/chaincode
+      - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+      - ./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+      - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
     depends_on:
       - orderer.example.com
       - peer0.org1.example.com

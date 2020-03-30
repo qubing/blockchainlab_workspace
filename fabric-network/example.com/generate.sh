@@ -14,31 +14,33 @@ function replacePrivateKey() {
 
   # The next steps will replace the template's contents with the
   # actual values of the private key file names for the two CAs.
+  cp ./config/templates/docker-compose.yaml ./
+  sed $OPTS "s/|TLS_ENABLED|/${TLS_ENABLED}/g" ./docker-compose.yaml
+  
   CURRENT_DIR=$PWD
   #org1
   cd crypto-config/peerOrganizations/org1.example.com/ca/
   PRIV_KEY=$(ls *_sk)
   cd "$CURRENT_DIR"
-  sed $OPTS "s/CA1_PRIVATE_KEY/${PRIV_KEY}/g" ./config/ca.org1.example.com.yaml
+  sed $OPTS "s/|CA1_PRIVATE_KEY|/${PRIV_KEY}/g" ./config/ca.org1.example.com.yaml
+  sed $OPTS "s/|CA1_PRIVATE_KEY|/${PRIV_KEY}/g" ./docker-compose.yaml
   
   #org2
   cd crypto-config/peerOrganizations/org2.example.com/ca/
   PRIV_KEY=$(ls *_sk)
   cd "$CURRENT_DIR"
-  sed $OPTS "s/CA2_PRIVATE_KEY/${PRIV_KEY}/g" ./config/ca.org2.example.com.yaml
+  sed $OPTS "s/|CA2_PRIVATE_KEY|/${PRIV_KEY}/g" ./config/ca.org2.example.com.yaml
+  sed $OPTS "s/|CA2_PRIVATE_KEY|/${PRIV_KEY}/g" ./docker-compose.yaml
 
-  cp ./config/templates/docker-compose.yaml ./
-  sed $OPTS "s/|TLS_ENABLED|/${TLS_ENABLED}/g" ./docker-compose.yaml
-
-  cp ./config/templates/go-dev.yaml ./
-  sed $OPTS "s/|TLS_ENABLED|/${TLS_ENABLED}/g" ./go-dev.yaml
+  # cp ./config/templates/go-dev.yaml ./
+  # sed $OPTS "s/|TLS_ENABLED|/${TLS_ENABLED}/g" ./go-dev.yaml
 
   # If MacOSX, remove the temporary backup of the docker-compose file
   if [ "$ARCH" == "Darwin" ]; then
     rm ./config/ca.org1.example.com.yamlt
     rm ./config/ca.org2.example.com.yamlt
     rm ./docker-compose.yamlt
-    rm ./go-dev.yamlt
+    # rm ./go-dev.yamlt
   fi
 }
 

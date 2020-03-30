@@ -12,7 +12,6 @@
 #
 ################################################################################
 General:
-
     # Listen address: The IP on which to bind to listen.
     ListenAddress: 127.0.0.1
 

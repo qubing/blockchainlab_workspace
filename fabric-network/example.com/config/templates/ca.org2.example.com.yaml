@@ -69,7 +69,7 @@ tls:
   enabled: false
   # TLS for the server's listening port
   certfile: tls/ca.org2.example.com-cert.pem
-  keyfile: tls/CA2_PRIVATE_KEY
+  keyfile: tls/|CA2_PRIVATE_KEY|
   clientauth:
     type: noclientcert
     certfiles:
@@ -88,7 +88,7 @@ ca:
   # Name of this CA
   name: ca.org2.example.com
   # Key file (is only used to import a private key into BCCSP)
-  keyfile: msp/CA2_PRIVATE_KEY
+  keyfile: msp/|CA2_PRIVATE_KEY|
   # Certificate file (default: ca-cert.pem)
   certfile: msp/ca.org2.example.com-cert.pem
   # Chain file
